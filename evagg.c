@@ -12,8 +12,6 @@ typedef struct cmd_t {
 typedef struct coproc_t {
     int pipe[2];
     FILE *  fout;
-    char *  file;
-    int argc;
     char ** argv;
 } coproc;
 
@@ -43,35 +41,60 @@ split_args(char * argv)
     }
 }
 
-void
-init_coproc(coproc * cop, char * file, int argc, char ** argv)
+coproc *
+alloc_coproc(char * argv)
 {
-    cop->file = file;
-    cop->argc = argc;
-    cop->argv = argv;
+    if (argv == NULL) {
+        return NULL;
+
+    } else {
+        coproc * cop = calloc(1, sizeof(coproc));
+        cop->argv = split_args(argv);
+        /*
+        cop->cmd = alloc_cmd(line);
+
+        if (cop->cmd != NULL) {
+            cop->cmd->argv = realloc(cop->cmd->argv, sizeof(char *));
+            cop->cmd->argv[cop->cmd->argc] = NULL;
+        }
+        */
+
+        return cop;
+    }
+}
+
+void
+free_coproc(coproc * cop)
+{
+    if (cop != NULL) {
+        free(cop->argv);
+        free(cop);
+    }
+}
+
+void
+init_coproc(coproc * cop)
+{
     pipe(cop->pipe);
     cop->fout = fdopen(cop->pipe[0], "r");
 }
 
 void
-run_coproc(coproc * cop)
+deinit_coproc(coproc * cop)
 {
-    int nargs = 2 + cop->argc;
-    char * args[nargs];
-
-    memset(args, 0, sizeof(char *) * nargs);
-    args[0] = cop->file;
-
-    for (int n = 0; n < cop->argc; ++n) {
-        args[n + 1] = cop->argv[n];
+    if (cop != NULL) {
+        fclose(cop->fout);
+        close(cop->pipe[0]);
+        close(cop->pipe[1]);
     }
-
-    dup2(1, cop->pipe[1]);
-    execvp(cop->file, (char * const *)args);
 }
 
-        }
-
+void
+run_coproc(coproc * cop)
+{
+    if (cop != NULL && cop->argv != NULL) {
+        dup2(1, cop->pipe[1]);
+        execvp(cop->argv[0], cop->argv);
     }
 }
 
