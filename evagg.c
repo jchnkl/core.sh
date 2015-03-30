@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/select.h>
+#include <stropts.h>
+#include <poll.h>
 
 typedef struct cmd_t {
   int argc;
@@ -129,23 +130,25 @@ main(int argc, char ** argv)
   if (pid != 0) {
     char * lineptr = NULL;
 
-    fd_set readfds;
-    FD_ZERO(&readfds);
+    nfds_t nfds = ncoprocs;
+    struct pollfd fds[ncoprocs];
+
     for (int n = 0; n < ncoprocs; ++n) {
-      FD_SET(coprocs[n]->pipe[1], &readfds);
+      fds[n].fd = coprocs[n]->pipe[1];
+      fds[n].events = 0;
+      fds[n].revents = 0;
     }
 
     while (1) {
-      int nfds = select(1, &readfds, NULL, NULL, NULL);
-
-      for (int i = 0; i < nfds; ++i) {
-        for (int n = 0; n < nfds; ++n) {
-          if (FD_ISSET(coprocs[n]->pipe[1], &readfds)) {
-            getline(&lineptr, 0, coprocs[n]->fout);
-            printf("lineptr: %s\n", lineptr);
-            free(lineptr);
-            lineptr = NULL;
-          }
+      // -1 == block until event
+      int ns = poll(fds, nfds, -1);
+      for (int n = 0; n < nfds && ns > 0; ++n) {
+        if (fds[n].revents & POLLIN) {
+          --ns;
+          getline(&lineptr, 0, coprocs[n]->fout);
+          printf("lineptr: %s\n", lineptr);
+          free(lineptr);
+          lineptr = NULL;
         }
       }
     }
