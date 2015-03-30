@@ -70,38 +70,9 @@ run_coproc(coproc * cop)
     execvp(cop->file, (char * const *)args);
 }
 
-cmd *
-alloc_cmd(char * line)
-{
-    if (line == NULL) {
-        return NULL;
-
-    } else {
-        int argc = 0;
-        char ** argv = NULL;
-
-        char * a = strtok(line, " ");
-
-        while (a != NULL) {
-            argv = realloc(argv, sizeof(char *));
-            argv[argc] = a;
-            ++argc;
-            a = strtok(NULL, " ");
         }
 
-        cmd * c = calloc(1, sizeof(cmd));
-        c->argc = argc;
-        c->argv = argv;
-
-        return c;
     }
-}
-
-void
-free_cmd(cmd * c)
-{
-    free(c->argv);
-    free(c);
 }
 
 int
