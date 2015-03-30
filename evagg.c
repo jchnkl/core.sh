@@ -4,6 +4,11 @@
 #include <unistd.h>
 #include <sys/select.h>
 
+typedef struct cmd_t {
+    int argc;
+    char ** argv;
+} cmd;
+
 typedef struct coproc_t {
     int pipe[2];
     FILE *  fout;
@@ -37,6 +42,40 @@ run_coproc(coproc * cop)
 
     dup2(1, cop->pipe[1]);
     execvp(cop->file, (char * const *)args);
+}
+
+cmd *
+alloc_cmd(char * line)
+{
+    if (line == NULL) {
+        return NULL;
+
+    } else {
+        int argc = 0;
+        char ** argv = NULL;
+
+        char * a = strtok(line, " ");
+
+        while (a != NULL) {
+            argv = realloc(argv, sizeof(char *));
+            argv[argc] = a;
+            ++argc;
+            a = strtok(NULL, " ");
+        }
+
+        cmd * c = calloc(1, sizeof(cmd));
+        c->argc = argc;
+        c->argv = argv;
+
+        return c;
+    }
+}
+
+void
+free_cmd(cmd * c)
+{
+    free(c->argv);
+    free(c);
 }
 
 int
