@@ -128,7 +128,6 @@ main(int argc, char ** argv)
   }
 
   if (pid != 0) {
-    char * lineptr = NULL;
 
     nfds_t nfds = ncoprocs;
     struct pollfd fds[ncoprocs];
@@ -139,16 +138,16 @@ main(int argc, char ** argv)
       fds[n].revents = 0;
     }
 
+    char buf[BUFSIZ];
+
     while (1) {
       // -1 == block until event
       int ns = poll(fds, nfds, -1);
       for (int n = 0; n < nfds && ns > 0; ++n) {
         if (fds[n].revents & POLLIN) {
           --ns;
-          getline(&lineptr, 0, coprocs[n]->fout);
-          printf("lineptr: %s\n", lineptr);
-          free(lineptr);
-          lineptr = NULL;
+          fgets(buf, BUFSIZ, coprocs[n]->fout);
+          printf("%s\n", buf);
         }
       }
     }
