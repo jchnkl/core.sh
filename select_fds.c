@@ -63,17 +63,6 @@ main(int argc, char ** argv)
     }
 
     if (pid != 0) {
-
-
-        /*
-    if (fork() == 0) {
-        run_coproc(&coprocs[0]);
-    } else {
-    */
-
-    // if (pid != 0) {
-        // parent
-
         char * lineptr = NULL;
 
         fd_set readfds;
@@ -84,7 +73,6 @@ main(int argc, char ** argv)
 
         while (1) {
             int nfds = select(1, &readfds, NULL, NULL, NULL);
-            // select(1, &readfds, NULL, NULL, NULL);
 
             for (int i = 0; i < nfds; ++i) {
                 for (int n = 0; n < nfds; ++n) {
@@ -98,48 +86,6 @@ main(int argc, char ** argv)
             }
         }
     }
-
-    /*
-    int fildes[2];
-
-    pipe(fildes);
-
-    pid_t pid = fork();
-
-    if (pid == 0) {
-        // child
-        // dup2(stdout, fildes[1]);
-        // fopen(stdout, "r");
-        char * const args[] = { "acpi_listen" };
-        dup2(1, fildes[1]);
-        execvp(args[0], args);
-    } else {
-        // parent
-
-        char * lineptr = NULL;
-        FILE * pstdout = fdopen(fildes[0], "r");
-
-        // int nfds;
-        fd_set readfds;
-        // fd_set writefds;
-        // fd_set errorfds;
-        // struct timeval timeout;
-
-        FD_ZERO(&readfds);
-        FD_SET(fildes[0], &readfds);
-        // FD_ZERO(&writefds);
-        // FD_ZERO(&errorfds);
-
-        while (1) {
-            // int nset = select(1, &readfds, NULL, NULL, NULL);
-            select(1, &readfds, NULL, NULL, NULL);
-            getline(&lineptr, 0, pstdout);
-            printf("lineptr: %s\n", lineptr);
-            free(lineptr);
-            lineptr = NULL;
-        }
-    }
-    */
 
     return 0;
 }
