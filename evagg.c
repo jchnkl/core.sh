@@ -90,6 +90,22 @@ deinit_coproc(coproc * cop)
 }
 
 void
+show_coproc(coproc * cop)
+{
+    printf("argv: {");
+    char ** arg = cop->argv;
+    while (*arg != NULL) {
+        printf(" %s", *arg);
+        ++arg;
+        if (*arg == NULL) {
+            printf(" });\n");
+        } else {
+            printf(",");
+        }
+    }
+}
+
+void
 run_coproc(coproc * cop)
 {
     if (cop != NULL && cop->argv != NULL) {
