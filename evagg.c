@@ -135,7 +135,7 @@ main(int argc, char ** argv)
 
     for (int n = 0; n < ncoprocs; ++n) {
       fds[n].fd = coprocs[n]->pipe[1];
-      fds[n].events = 0;
+      fds[n].events = POLLIN;
       fds[n].revents = 0;
     }
 
