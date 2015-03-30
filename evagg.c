@@ -125,29 +125,28 @@ main(int argc, char ** argv)
     }
   }
 
+  nfds_t nfds = ncoprocs;
+  struct pollfd fds[ncoprocs];
 
-    nfds_t nfds = ncoprocs;
-    struct pollfd fds[ncoprocs];
+  for (int n = 0; n < ncoprocs; ++n) {
+    fds[n].fd = coprocs[n]->master;
+    fds[n].events = POLLIN;
+    fds[n].revents = 0;
+  }
 
-    for (int n = 0; n < ncoprocs; ++n) {
-      fds[n].fd = coprocs[n]->master;
-      fds[n].events = POLLIN;
-      fds[n].revents = 0;
-    }
+  char buf[BUFSIZ];
 
-    char buf[BUFSIZ];
-
-    while (1) {
-      // -1 == block until event
-      int ns = poll(fds, nfds, -1);
-      for (int n = 0; n < nfds && ns > 0; ++n) {
-        if (fds[n].revents & POLLIN) {
-          --ns;
-          fgets(buf, BUFSIZ, coprocs[n]->fout);
-          printf("%s\n", buf);
-        }
+  while (1) {
+    // -1 == block until event
+    int ns = poll(fds, nfds, -1);
+    for (int n = 0; n < nfds && ns > 0; ++n) {
+      if (fds[n].revents & POLLIN) {
+        --ns;
+        fgets(buf, BUFSIZ, coprocs[n]->fout);
+        printf("%s\n", buf);
       }
     }
+  }
 
   return 0;
 }
