@@ -24,7 +24,7 @@ split_args(char * argv)
   } else {
     int argc = 0;
     char ** args = NULL;
-    char * line = argv; // strdup(argv);
+    char * line = argv;
     char * arg = strtok(line, " ");
 
     while (arg != NULL) {
@@ -50,14 +50,6 @@ alloc_coproc(char * argv)
   } else {
     coproc * cop = calloc(1, sizeof(coproc));
     cop->argv = split_args(argv);
-    /*
-       cop->cmd = alloc_cmd(line);
-
-       if (cop->cmd != NULL) {
-       cop->cmd->argv = realloc(cop->cmd->argv, sizeof(char *));
-       cop->cmd->argv[cop->cmd->argc] = NULL;
-       }
-       */
 
     return cop;
   }
