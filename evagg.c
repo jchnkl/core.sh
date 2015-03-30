@@ -111,10 +111,7 @@ main(int argc, char ** argv)
     init_coproc(coprocs[n-1]);
   }
 
-  pid_t pid;
   for (int n = 0; n < ncoprocs; ++n) {
-    pid = fork();
-    if (pid == 0) {
     openpty(&coprocs[n]->master, &coprocs[n]->slave, NULL, NULL, NULL);
 
     if (fork() == 0) {
@@ -128,7 +125,6 @@ main(int argc, char ** argv)
     }
   }
 
-  if (pid != 0) {
 
     nfds_t nfds = ncoprocs;
     struct pollfd fds[ncoprocs];
@@ -152,7 +148,6 @@ main(int argc, char ** argv)
         }
       }
     }
-  }
 
   return 0;
 }
