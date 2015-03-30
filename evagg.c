@@ -4,9 +4,12 @@
 #include <unistd.h>
 #include <stropts.h>
 #include <poll.h>
+#include <pty.h>
+#include <utmp.h>
 
 typedef struct coproc_t {
-  int pipe[2];
+  int master;
+  int slave;
   FILE *  fout;
   char ** argv;
 } coproc;
@@ -63,8 +66,6 @@ free_coproc(coproc * cop)
 void
 init_coproc(coproc * cop)
 {
-  pipe(cop->pipe);
-  cop->fout = fdopen(cop->pipe[0], "r");
 }
 
 void
@@ -72,8 +73,6 @@ deinit_coproc(coproc * cop)
 {
   if (cop != NULL) {
     fclose(cop->fout);
-    close(cop->pipe[0]);
-    close(cop->pipe[1]);
   }
 }
 
@@ -97,7 +96,6 @@ void
 run_coproc(coproc * cop)
 {
   if (cop != NULL && cop->argv != NULL) {
-    dup2(1, cop->pipe[1]);
     execvp(cop->argv[0], cop->argv);
   }
 }
@@ -117,8 +115,16 @@ main(int argc, char ** argv)
   for (int n = 0; n < ncoprocs; ++n) {
     pid = fork();
     if (pid == 0) {
-      run_coproc(coprocs[n]);
-      break;
+    openpty(&coprocs[n]->master, &coprocs[n]->slave, NULL, NULL, NULL);
+
+    if (fork() == 0) {
+      login_tty(coprocs[n]->slave);
+      close(coprocs[n]->master);
+      execvp(coprocs[n]->argv[0], coprocs[n]->argv);
+
+    } else {
+      close(coprocs[n]->slave);
+      coprocs[n]->fout = fdopen(coprocs[n]->master, "r");
     }
   }
 
@@ -128,7 +134,7 @@ main(int argc, char ** argv)
     struct pollfd fds[ncoprocs];
 
     for (int n = 0; n < ncoprocs; ++n) {
-      fds[n].fd = coprocs[n]->pipe[1];
+      fds[n].fd = coprocs[n]->master;
       fds[n].events = POLLIN;
       fds[n].revents = 0;
     }
