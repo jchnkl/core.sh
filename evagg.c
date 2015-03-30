@@ -117,22 +117,19 @@ run_coproc(coproc * cop)
 int
 main(int argc, char ** argv)
 {
-    int ncoprocs = 3;
-    coproc coprocs[ncoprocs];
+    int ncoprocs = argc - 1;
+    coproc * coprocs[ncoprocs];
 
-    init_coproc(&coprocs[0], "acpi_listen", 0, NULL);
-
-    char * dbus_monitor[] = { "--profile", "--system" };
-    init_coproc(&coprocs[1], "dbus-monitor", 2, dbus_monitor);
-
-    char * udevadm[] = { "monitor", "--u" };
-    init_coproc(&coprocs[2], "udevadm", 2, udevadm);
+    for (int n = 1; n < argc; ++n) {
+        coprocs[n-1] = alloc_coproc(argv[n]);
+        init_coproc(coprocs[n-1]);
+    }
 
     pid_t pid;
     for (int n = 0; n < ncoprocs; ++n) {
         pid = fork();
         if (pid == 0) {
-            run_coproc(&coprocs[n]);
+            run_coproc(coprocs[n]);
             break;
         }
     }
@@ -143,7 +140,7 @@ main(int argc, char ** argv)
         fd_set readfds;
         FD_ZERO(&readfds);
         for (int n = 0; n < ncoprocs; ++n) {
-            FD_SET(coprocs[n].pipe[1], &readfds);
+            FD_SET(coprocs[n]->pipe[1], &readfds);
         }
 
         while (1) {
@@ -151,8 +148,8 @@ main(int argc, char ** argv)
 
             for (int i = 0; i < nfds; ++i) {
                 for (int n = 0; n < nfds; ++n) {
-                    if (FD_ISSET(coprocs[n].pipe[1], &readfds)) {
-                        getline(&lineptr, 0, coprocs[n].fout);
+                    if (FD_ISSET(coprocs[n]->pipe[1], &readfds)) {
+                        getline(&lineptr, 0, coprocs[n]->fout);
                         printf("lineptr: %s\n", lineptr);
                         free(lineptr);
                         lineptr = NULL;
