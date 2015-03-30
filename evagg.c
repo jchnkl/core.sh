@@ -17,6 +17,32 @@ typedef struct coproc_t {
     char ** argv;
 } coproc;
 
+char **
+split_args(char * argv)
+{
+    if (argv == NULL) {
+        return NULL;
+
+    } else {
+        int argc = 0;
+        char ** args = NULL;
+        char * line = argv; // strdup(argv);
+        char * arg = strtok(line, " ");
+
+        while (arg != NULL) {
+            args = realloc(args, (argc + 1) * sizeof(char *));
+            args[argc] = arg;
+            ++argc;
+            arg = strtok(NULL, " ");
+        }
+
+        args = realloc(args, (argc + 1) * sizeof(char *));
+        args[argc] = NULL;
+
+        return args;
+    }
+}
+
 void
 init_coproc(coproc * cop, char * file, int argc, char ** argv)
 {
