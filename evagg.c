@@ -5,11 +5,6 @@
 #include <stropts.h>
 #include <poll.h>
 
-typedef struct cmd_t {
-  int argc;
-  char ** argv;
-} cmd;
-
 typedef struct coproc_t {
   int pipe[2];
   FILE *  fout;
