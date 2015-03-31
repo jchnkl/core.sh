@@ -143,7 +143,7 @@ main(int argc, char ** argv)
       if (fds[n].revents & POLLIN) {
         --ns;
         fgets(buf, BUFSIZ, coprocs[n]->fout);
-        printf("%s\n", buf);
+        printf("%s", buf);
       }
     }
   }
