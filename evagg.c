@@ -125,6 +125,8 @@ main(int argc, char ** argv)
     }
   }
 
+  setvbuf(stdout, NULL, _IONBF, BUFSIZ);
+
   nfds_t nfds = ncoprocs;
   struct pollfd fds[ncoprocs];
 
