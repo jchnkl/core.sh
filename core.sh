@@ -20,7 +20,7 @@ fi
 
 coproc {
     declare -a srcs
-    for src in $(echo ${SRCS_D}/*.sh); do
+    for src in $(echo ${SRCS_D}/*); do
         if [ -x ${src} ]; then
             srcs+=(${src})
         fi
@@ -32,7 +32,7 @@ coproc {
 trap "kill ${COPROC_PID}" EXIT
 
 while read -u ${COPROC[0]}; do
-    for sink in $(echo ${SINKS_D}/*.sh); do
+    for sink in $(echo ${SINKS_D}/*); do
         if [ -x ${sink} ]; then
             ${sink} ${REPLY}
         fi
