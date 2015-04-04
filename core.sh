@@ -1,12 +1,6 @@
 #!/bin/bash
 
-if [ -z "${EVAGG}" ]; then
-    echo "Please set EVAGG"
-    exit 1
-elif [ ! -x "$(which ${EVAGG} 2>/dev/null)" ]; then
-    echo "Not an executable: ${EVAGG}"
-    exit 1
-fi
+EVAGG=
 
 if [ -z "${SRCS_D}" ]; then
     echo "Please set SRCS_D"
