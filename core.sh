@@ -29,7 +29,7 @@ coproc {
     ${EVAGG} ${srcs[@]}
 }
 
-trap "kill ${COPROC_PID}" EXIT
+trap "kill $(ps -o pid= --ppid ${COPROC_PID}) ${COPROC_PID}" EXIT
 
 while read -u ${COPROC[0]}; do
     for sink in $(echo ${SINKS_D}/*); do
